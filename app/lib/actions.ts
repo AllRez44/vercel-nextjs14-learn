@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { sql } from  '@vercel/postgres'
 import { revalidatePath } from "next/cache";
 import {redirect} from "next/navigation";
- 
+
 const FormSchema = z.object({
   id: z.string(),
   customerId: z.string(),
@@ -37,11 +37,15 @@ export async function createInvoice(formData: FormData) {
   `
     console.log('Invoice created successfully')
     revalidatePath('/dashboard/invoices');
+    return { message: 'Invoice created successfully' }
   }
   catch (error)
   {
     console.log('Database error:', error)
-    throw new Error('Failed to create invoice')
+
+    return {
+      message: `Failed to create invoice`
+    }
   }
   redirect('/dashboard/invoices');
 }
@@ -71,11 +75,15 @@ export async function updateInvoice(id: string, formData: FormData) {
   `
     console.log(`Invoice ${id} updated successfully`)
     revalidatePath('/dashboard/invoices');
+    return { message: 'Invoice updated successfully' }
   }
   catch (error)
   {
     console.log('Database error:', error)
-    throw new Error(`Failed to update invoice ${id}`)
+    console.log('Invoice: ', id)
+    return {
+      message: `Failed to update invoice`
+    }
   }
   redirect('/dashboard/invoices');
 }
@@ -88,10 +96,14 @@ export async function deleteInvoice(id: string) {
     await sql`DELETE FROM invoices WHERE id = ${id}`
     console.log(`Invoice ${id} deleted successfully`)
     revalidatePath('/dashboard/invoices');
+    return { message: 'Invoice delete successfully' }
   }
   catch (error)
   {
-    console.log('Database error:', error)
-    throw new Error(`Failed to delete invoice ${id}`)
+    console.log('Database error:', error);
+    console.log('Invoice: ', id)
+    return {
+     message: `Failed to delete invoice`,
+    }
   }
 }
